@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Add Vehicle</title>
+<div style="
+    text-align:center;
+    padding:12px;
+    background:linear-gradient(90deg,#00a8ff,#2ecc71);
+    color:white;
+    font-size:20px;
+    font-weight:bold;
+">
+🚗 Smart Vehicle Monitoring & Predictive Alert System
+</div>
+<nav style="
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#2f3640;
+    color:white;
+">
+<div>🚗 Tracker</div>
+
+<div>
+<a href="{% url 'vehicle_list' %}" style="color:white;margin-right:10px;">Vehicles</a>
+<a href="{% url 'logout' %}" style="color:white;">Logout</a>
+</div>
+</nav>
+<style>
+body{
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    font-family: Segoe UI;
+    color:white;
+    margin:0;
+}
+
+.container{
+    width:350px;
+    margin:80px auto;
+    background:#2f3640;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.5);
+    text-align:center;
+}
+
+input{
+    width:90%;
+    padding:10px;
+    margin:10px 0;
+    border:none;
+    border-radius:6px;
+}
+
+.btn{
+    width:95%;
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:#2ecc71;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+a{
+    display:block;
+    margin-top:15px;
+    color:#3498db;
+    text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🚗 Add Vehicle</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="number" placeholder="Vehicle Number" required>
+    <input type="text" name="model" placeholder="Model Name" required>
+    <button class="btn">Add Vehicle</button>
+</form>
+
+<a href="{% url 'vehicle_list' %}">⬅ Back</a>
+
+</div>
+
+</body>
+<footer style="
+    text-align:center;
+    padding:10px;
+    background:#2f3640;
+    color:white;
+    margin-top:20px;
+">
+© 2026 Smart Vehicle Monitoring System | Developed by Pooja
+</footer>
+</html>

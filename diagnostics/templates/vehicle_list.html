@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vehicle List</title>
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+}
+
+/* HEADER */
+.header{
+    text-align:center;
+    padding:12px;
+    background:linear-gradient(90deg,#00a8ff,#2ecc71);
+    font-weight:bold;
+}
+
+/* NAV */
+nav{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#2f3640;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:10px;
+}
+
+/* CONTAINER */
+.container{
+    width:90%;
+    margin:auto;
+    margin-top:20px;
+}
+
+/* TITLE */
+h2{
+    text-align:center;
+}
+
+/* SEARCH */
+.search{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.search input{
+    padding:8px;
+    border-radius:6px;
+    border:none;
+}
+
+.search button{
+    padding:8px;
+    border:none;
+    background:#00a8ff;
+    color:white;
+    border-radius:6px;
+}
+
+/* ADD BUTTON */
+.add-btn{
+    display:block;
+    margin:10px auto;
+    background:#2ecc71;
+    padding:10px;
+    border-radius:8px;
+    text-align:center;
+    width:180px;
+    text-decoration:none;
+    color:white;
+}
+
+/* GRID */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+/* CARD */
+.card{
+    background:#2f3640;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,0.5);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+/* ICON */
+.icon{
+    font-size:30px;
+    margin-bottom:10px;
+}
+
+/* BUTTONS */
+.btn{
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    color:white;
+    font-size:13px;
+    margin:3px;
+}
+
+.view{ background:#3498db; }
+.edit{ background:#f1c40f; color:black; }
+.delete{ background:#e74c3c; }
+</style>
+
+<script>
+function confirmDelete(){
+    return confirm("Delete vehicle?");
+}
+</script>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+🚗 Smart Vehicle Monitoring & Predictive Alert System
+</div>
+
+<!-- NAV -->
+<nav>
+<div>🚗 Tracker</div>
+<div>
+<a href="{% url 'vehicle_list' %}">Home</a>
+<a href="{% url 'logout' %}">Logout</a>
+</div>
+</nav>
+
+<div class="container">
+
+<h2>🚘 Vehicle Dashboard</h2>
+
+<!-- SEARCH -->
+<div class="search">
+<form method="get">
+<input name="q" placeholder="Search vehicle">
+<button><i class="fa fa-search"></i></button>
+</form>
+</div>
+
+<!-- ADD -->
+<a href="{% url 'add_vehicle' %}" class="add-btn">
+<i class="fa fa-plus"></i> Add Vehicle
+</a>
+
+<!-- CARDS -->
+<div class="grid">
+
+{% for v in vehicles %}
+<div class="card">
+
+<div class="icon"><i class="fa fa-car"></i></div>
+
+<h3>{{ v.vehicle_number }}</h3>
+<p>{{ v.model_name }}</p>
+
+<div>
+<a href="{% url 'dashboard' v.id %}" class="btn view">
+<i class="fa fa-eye"></i>
+</a>
+
+<a href="{% url 'edit_vehicle' v.id %}" class="btn edit">
+<i class="fa fa-pen"></i>
+</a>
+
+<a href="{% url 'delete_vehicle' v.id %}" 
+   class="btn delete"
+   onclick="return confirmDelete()">
+<i class="fa fa-trash"></i>
+</a>
+</div>
+
+</div>
+{% empty %}
+<p style="text-align:center;">No vehicles found</p>
+{% endfor %}
+
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="text-align:center;padding:10px;background:#2f3640;margin-top:20px;">
+© 2026 Smart Vehicle Monitoring System
+</footer>
+
+</body>
+</html> 

@@ -1,0 +1,58 @@
+<div style="
+    text-align:center;
+    padding:12px;
+    background:linear-gradient(90deg,#00a8ff,#2ecc71);
+    color:white;
+    font-size:20px;
+    font-weight:bold;
+">
+🚗 Smart Vehicle Monitoring & Predictive Alert System
+</div>
+<nav style="
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#2f3640;
+    color:white;
+">
+<div>🚗 Tracker</div>
+
+<div>
+<a href="{% url 'vehicle_list' %}" style="color:white;margin-right:10px;">Vehicles</a>
+<a href="{% url 'logout' %}" style="color:white;">Logout</a>
+</div>
+</nav>
+<h2>Telemetry History</h2>
+
+<table border="1">
+
+<tr>
+<th>Engine Temp</th>
+<th>Oil Pressure</th>
+<th>Battery</th>
+<th>RPM</th>
+<th>Speed</th>
+</tr>
+
+{% for d in data %}
+
+<tr>
+<td>{{ d.engine_temp }}</td>
+<td>{{ d.oil_pressure }}</td>
+<td>{{ d.battery_voltage }}</td>
+<td>{{ d.rpm }}</td>
+<td>{{ d.speed }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+<footer style="
+    text-align:center;
+    padding:10px;
+    background:#2f3640;
+    color:white;
+    margin-top:20px;
+">
+© 2026 Smart Vehicle Monitoring System | Developed by Pooja
+</footer>

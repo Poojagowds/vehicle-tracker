@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vehicle Dashboard</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:#1e272e;
+    color:white;
+}
+
+/* LIGHT MODE */
+.light-mode{
+    background:white;
+    color:black;
+}
+
+/* NAV */
+nav{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#2f3640;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:10px;
+}
+
+/* GRID */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(7,120px);
+    justify-content:center;
+    gap:10px;
+    margin-top:10px;
+}
+
+.card{
+    padding:10px;
+    border-radius:8px;
+    text-align:center;
+}
+
+/* COLORS */
+.temp{ background:#e74c3c;}
+.oil{ background:#3498db;}
+.battery{ background:#2ecc71;}
+.speed{ background:#f1c40f; color:black;}
+.rpm{ background:#9b59b6;}
+.location{ background:#34495e;}
+.pred{ background:#16a085;}
+
+/* ALERT */
+#alert{
+    text-align:center;
+    font-size:18px;
+}
+
+/* MAP */
+#map{
+    height:250px;
+    width:80%;
+    margin:20px auto;
+    border-radius:10px;
+}
+
+/* SPEEDOMETER */
+.chart{
+    width:300px;
+    margin:auto;
+    text-align:center;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔊 SOUND -->
+<audio id="alarmSound">
+<source src="https://www.soundjay.com/buttons/beep-07.mp3">
+</audio>
+
+<!-- HEADER -->
+<div style="text-align:center;padding:10px;background:linear-gradient(90deg,#00a8ff,#2ecc71);">
+🚗 Smart Vehicle Monitoring & Predictive Alert System
+</div>
+
+<!-- NAV -->
+<nav>
+<div>🚗 Dashboard</div>
+<div>
+<a href="{% url 'vehicle_list' %}">Vehicles</a>
+<a href="{% url 'logout' %}">Logout</a>
+<button onclick="toggleTheme()">🌙</button>
+</div>
+</nav>
+
+<h3 style="text-align:center;">📊 Live Vehicle Monitoring Dashboard</h3>
+
+<div id="alert"></div>
+
+<!-- CARDS -->
+<div class="grid">
+<div class="card temp">--</div>
+<div class="card oil">--</div>
+<div class="card battery">--</div>
+<div class="card speed">--</div>
+<div class="card rpm">--</div>
+<div class="card location">--</div>
+<div class="card pred">🤖 --</div>
+</div>
+
+<!-- SPEEDOMETER -->
+<div class="chart">
+<canvas id="speedGauge"></canvas>
+<div id="speedText">0 km/h</div>
+</div>
+
+<!-- MAP -->
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+// THEME
+function toggleTheme(){
+    document.body.classList.toggle("light-mode");
+}
+
+// NOTIFICATION
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+
+// ALERT CONTROL
+let alertActive = false;
+
+// ELEMENTS
+const tempEl = document.querySelector(".temp");
+const oilEl = document.querySelector(".oil");
+const batteryEl = document.querySelector(".battery");
+const speedEl = document.querySelector(".speed");
+const rpmEl = document.querySelector(".rpm");
+const cityEl = document.querySelector(".location");
+const predEl = document.querySelector(".pred");
+const alertEl = document.getElementById("alert");
+
+// MAP (NO HISTORY)
+const map = L.map('map').setView([12.9716,77.5946],15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const carIcon = L.icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/743/743131.png",
+    iconSize: [35,35]
+});
+
+let vehicleMarker = null;
+
+// SPEEDOMETER
+const speedChart = new Chart(document.getElementById("speedGauge"), {
+    type: 'doughnut',
+    data: {
+        datasets: [{
+            data: [0,100],
+            backgroundColor:["#00a8ff","#2f3640"],
+            borderWidth:0,
+            cutout:'70%'
+        }]
+    },
+    options:{
+        rotation:-90,
+        circumference:180,
+        plugins:{legend:{display:false}}
+    }
+});
+
+// LIVE DATA
+setInterval(()=>{
+
+fetch('/live/?id={{ vehicle_id }}')
+.then(res=>res.json())
+.then(data=>{
+
+    tempEl.innerHTML = "🔥 "+data.engine_temp+"°C";
+    oilEl.innerHTML = "🛢 "+data.oil_pressure;
+    batteryEl.innerHTML = "🔋 "+data.battery_voltage+"V";
+    speedEl.innerHTML = "🚗 "+data.speed;
+    rpmEl.innerHTML = "⚙ "+data.rpm;
+    cityEl.innerHTML = "📍 "+data.city;
+    predEl.innerHTML = "🤖 "+data.predicted_temp+"°C";
+
+    // ALERT
+    if(data.alert && !alertActive){
+        alertActive = true;
+
+        alertEl.innerHTML = "🚨 " + data.alert;
+        alertEl.style.animation = "blink 1s infinite";
+        document.body.style.background = "#8B0000";
+
+        document.getElementById("alarmSound").play();
+
+        if(Notification.permission === "granted"){
+            new Notification("🚨 Vehicle Alert!", { body: data.alert });
+        }
+
+    } else if(!data.alert){
+        alertActive = false;
+        alertEl.innerHTML = "";
+        alertEl.style.animation = "";
+        document.body.style.background = "#1e272e";
+    }
+
+    // SPEEDOMETER
+    let safeSpeed = Math.min(data.speed,100);
+    speedChart.data.datasets[0].data = [safeSpeed,100-safeSpeed];
+    speedChart.update('none');
+    document.getElementById("speedText").innerHTML = safeSpeed+" km/h";
+
+    // MAP (SINGLE MARKER)
+    const lat = data.latitude;
+    const lon = data.longitude;
+
+    if(!vehicleMarker){
+        vehicleMarker = L.marker([lat,lon],{icon:carIcon}).addTo(map);
+    } else {
+        vehicleMarker.setLatLng([lat,lon]);
+    }
+
+    map.panTo([lat,lon]);
+
+});
+
+},2000);
+
+// GPS UPDATE
+navigator.geolocation.watchPosition(pos=>{
+    fetch(`/update-location/?id={{ vehicle_id }}&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+});
+
+</script>
+
+</body>
+</html>
